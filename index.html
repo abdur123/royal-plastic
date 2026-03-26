@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Royal Plastic & Kitchen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #c0392b;
+      --dark: #1a1a1a;
+      --light: #f9f9f9;
+      --accent: #f39c12;
+      --gray: #666;
+    }
+
+    body { font-family: 'Segoe UI', sans-serif; color: var(--dark); background: #fff; padding-top: 65px; }
+
+    /* NAV */
+    nav {
+      background: var(--dark);
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 65px;
+    }
+
+    .logo {
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .logo span { color: var(--accent); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2.2rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { background: #d68910; transform: scale(1.04); }
+
+    /* SECTION COMMON */
+    section { padding: 70px 5%; }
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+    .section-title span { color: var(--primary); }
+    .section-sub {
+      text-align: center;
+      color: var(--gray);
+      margin-bottom: 3rem;
+      font-size: 1rem;
+    }
+
+    /* CATEGORIES */
+    .categories { background: var(--light); }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .cat-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+
+    .cat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .cat-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .cat-card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; color: var(--dark); }
+    .cat-card p { font-size: 0.88rem; color: var(--gray); }
+
+    /* PRODUCTS */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .product-card:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+    }
+
+    .product-img {
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      background: var(--light);
+    }
+
+    .product-info { padding: 1rem; }
+    .product-info h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+    .product-info p { font-size: 0.82rem; color: var(--gray); margin-bottom: 0.6rem; }
+    .product-info .price { color: var(--primary); font-weight: 700; font-size: 1rem; }
+
+    .order-btn {
+      display: block;
+      width: 100%;
+      margin-top: 0.7rem;
+      padding: 0.5rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-btn:hover { background: #a93226; }
+
+    /* ORDER MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 460px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 1.2rem; }
+
+    .modal input, .modal textarea, .modal select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .modal input:focus, .modal textarea:focus { border-color: var(--primary); }
+
+    .modal-row { display: flex; gap: 0.8rem; }
+    .modal-row input { flex: 1; }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none; border: none;
+      font-size: 1.4rem; cursor: pointer; color: #aaa;
+    }
+    .modal-close:hover { color: var(--primary); }
+
+    .modal-submit {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-submit:hover { background: #a93226; }
+
+    /* ORDERS TABLE */
+    .orders-section { background: var(--light); }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-Pending    { background: #fef3cd; color: #856404; }
+    .status-Confirmed  { background: #d1e7dd; color: #0f5132; }
+    .status-Delivered  { background: #cfe2ff; color: #084298; }
+    .status-Cancelled  { background: #f8d7da; color: #842029; }
+
+    .status-select {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    /* WHY US */
+    .why { background: var(--light); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .why-item { text-align: center; }
+    .why-item .icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .why-item h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+    .why-item p { font-size: 0.88rem; color: var(--gray); }
+
+    /* CONTACT */
+    .contact-flex {
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .contact-info { flex: 1; min-width: 250px; }
+    .contact-info h3 { font-size: 1.3rem; margin-bottom: 1.2rem; color: var(--primary); }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .contact-item .icon { font-size: 1.4rem; margin-top: 2px; }
+    .contact-item p { font-size: 0.95rem; color: var(--gray); line-height: 1.5; }
+
+    .contact-form { flex: 1; min-width: 280px; }
+    .contact-form h3 { font-size: 1.3rem; margin-bottom: 1.2rem; color: var(--primary); }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus { border-color: var(--primary); }
+
+    .contact-form textarea { resize: vertical; min-height: 110px; }
+
+    .contact-form button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .contact-form button:hover { background: #a93226; }
+
+    /* MESSAGES TABLE */
+    .messages-section { background: var(--light); }
+
+    .msg-table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    thead { background: var(--primary); color: #fff; }
+    thead th { padding: 1rem 1.2rem; text-align: left; font-size: 0.95rem; }
+
+    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fef9f9; }
+    tbody td { padding: 0.9rem 1.2rem; font-size: 0.92rem; color: var(--gray); vertical-align: top; }
+    tbody td:first-child { color: var(--dark); font-weight: 600; }
+
+    .no-msg { text-align: center; color: #bbb; padding: 2rem; font-style: italic; }
+
+    .del-btn {
+      background: none;
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+      padding: 0.25rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .del-btn:hover { background: #e74c3c; color: #fff; }
+
+    .clear-btn {
+      margin-top: 1rem;
+      background: none;
+      border: 1px solid #aaa;
+      color: #888;
+      padding: 0.4rem 1.2rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .clear-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+
+    /* FOOTER */
+    footer {
+      background: var(--dark);
+      color: #aaa;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.88rem;
+    }
+
+    footer span { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: brightness(0.45);
+    }
+
+    .hero-content {
+      position: absolute;
+      z-index: 1;
+      color: #fff;
+      padding: 0 1rem;
+    }
+
+    .hero-content h1 {
+      font-size: 3rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .hero-content h1 span { color: var(--accent); }
+
+    .hero-content p {
+      font-size: 1.15rem;
+      color: #ddd;
+      max-width: 540px;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-content .btn {
+      font-size: 1rem;
+      padding: 0.85rem 2.5rem;
+    }
+
+    /* SLIDER */
+    .slider-section { position: relative; overflow: hidden; background: #111; margin-top: 0; }
+
+    .slider-track {
+      display: flex;
+      align-items: flex-start;
+      transition: transform 0.6s cubic-bezier(.77,0,.18,1);
+    }
+
+    .slide {
+      min-width: 100%;
+      position: relative;
+    }
+
+    .slide img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .slide img.loaded { opacity: 1; }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      color: #fff;
+      padding: 2rem 2rem 1.5rem;
+    }
+
+    .slide-caption h3 { font-size: 1.5rem; }
+    .slide-caption p  { font-size: 0.95rem; color: #ddd; margin-top: 0.3rem; }
+
+    .slider-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #fff;
+      font-size: 1.5rem;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .slider-btn:hover { background: var(--primary); border-color: var(--primary); }
+    .slider-btn.prev { left: 1.2rem; }
+    .slider-btn.next { right: 1.2rem; }
+
+    .slider-dots {
+      position: absolute;
+      bottom: 1rem; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px;
+    }
+
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .dot.active { background: #fff; transform: scale(1.3); }
+
+    /* SMOOTH SCROLL */
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Royal <span>Plastic</span> & Kitchen</div>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#categories">Categories</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#orders">Orders</a></li>
+    </ul>
+  </nav>
+
+  <!-- ORDER MODAL -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeOrder()">&#x2715;</button>
+      <h3>Place Order</h3>
+      <input type="text" id="o-product" readonly>
+      <input type="text" id="o-customer" placeholder="Your Name">
+      <input type="text" id="o-phone" placeholder="Phone Number">
+      <textarea id="o-address" placeholder="Delivery Address" rows="2"></textarea>
+      <div class="modal-row">
+        <input type="number" id="o-qty" placeholder="Quantity" min="1" value="1" oninput="updateTotal()">
+        <input type="text" id="o-total" placeholder="Total (Rs.)" readonly>
+      </div>
+      <button class="modal-submit" onclick="submitOrder()">Confirm Order</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <img class="hero-bg" src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1600&q=80" alt="Hero">
+    <div class="hero-content">
+      <h1>Quality Plastic &<br><span>Kitchen Products</span></h1>
+      <p>Durable, affordable, and stylish plastic and kitchen solutions for every home and business.</p>
+      <a href="#products" class="btn">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- SLIDER -->
+  <div class="slider-section">
+    <div class="slider-track" id="sliderTrack">
+
+      <div class="slide">
+        <img data-src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80" alt="Kitchen Products">
+        <div class="slide-caption">
+          <h3>Premium Kitchen Products</h3>
+          <p>Everything you need for a modern kitchen</p>
+        </div>
+      </div>
+
+      <div class="slide">
+        <img data-src="https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=1200&q=80" alt="Plastic Storage">
+        <div class="slide-caption">
+          <h3>Durable Plastic Storage</h3>
+          <p>Strong, lightweight storage for every space</p>
+        </div>
+      </div>
+
+      <div class="slide">
+        <img data-src="https://images.unsplash.com/photo-1565183928294-7063f23ce0f8?w=1200&q=80" alt="Food Containers">
+        <div class="slide-caption">
+          <h3>Airtight Food Containers</h3>
+          <p>Keep your food fresh and organised</p>
+        </div>
+      </div>
+
+      <div class="slide">
+        <img data-src="https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=1200&q=80" alt="Home Essentials">
+        <div class="slide-caption">
+          <h3>Home Essentials</h3>
+          <p>Quality products for every room in your home</p>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="slider-btn prev" onclick="moveSlide(-1)">&#8249;</button>
+    <button class="slider-btn next" onclick="moveSlide(1)">&#8250;</button>
+
+    <div class="slider-dots" id="sliderDots"></div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <section class="categories" id="categories">
+    <h2 class="section-title">Our <span>Categories</span></h2>
+    <p class="section-sub">Explore our wide range of products</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-icon">🪣</div>
+        <h3>Storage & Containers</h3>
+        <p>Buckets, bins, boxes, and storage solutions for home and industry.</p>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon">🍳</div>
+        <h3>Kitchen Essentials</h3>
+        <p>Cookware, utensils, chopping boards, and everyday kitchen tools.</p>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon">🧴</div>
+        <h3>Household Plastic</h3>
+        <p>Laundry baskets, hangers, trays, and cleaning accessories.</p>
+      </div>
+      <div class="cat-card">
+        <div class="cat-icon">🥡</div>
+        <h3>Food Containers</h3>
+        <p>Airtight containers, lunch boxes, and food-safe storage products.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="products">
+    <h2 class="section-title">Featured <span>Products</span></h2>
+    <p class="section-sub">Best sellers from our collection</p>
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-img">🪣</div>
+        <div class="product-info">
+          <h4>Heavy Duty Bucket</h4>
+          <p>10L durable plastic bucket, multi-purpose use.</p>
+          <div class="price">Rs. 150</div>
+          <button class="order-btn" onclick="openOrder('Heavy Duty Bucket', 150)">Order Now</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">🍳</div>
+        <div class="product-info">
+          <h4>Non-Stick Pan Set</h4>
+          <p>3-piece kitchen pan set for everyday cooking.</p>
+          <div class="price">Rs. 1,200</div>
+          <button class="order-btn" onclick="openOrder('Non-Stick Pan Set', 1200)">Order Now</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">🥡</div>
+        <div class="product-info">
+          <h4>Airtight Container Set</h4>
+          <p>5-piece food-safe airtight storage containers.</p>
+          <div class="price">Rs. 850</div>
+          <button class="order-btn" onclick="openOrder('Airtight Container Set', 850)">Order Now</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">🧺</div>
+        <div class="product-info">
+          <h4>Laundry Basket</h4>
+          <p>Large ventilated plastic laundry basket.</p>
+          <div class="price">Rs. 450</div>
+          <button class="order-btn" onclick="openOrder('Laundry Basket', 450)">Order Now</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">🔪</div>
+        <div class="product-info">
+          <h4>Chopping Board</h4>
+          <p>Extra-thick non-slip kitchen chopping board.</p>
+          <div class="price">Rs. 320</div>
+          <button class="order-btn" onclick="openOrder('Chopping Board', 320)">Order Now</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">🫙</div>
+        <div class="product-info">
+          <h4>Storage Jar Set</h4>
+          <p>Clear plastic jar set for spices and dry goods.</p>
+          <div class="price">Rs. 600</div>
+          <button class="order-btn" onclick="openOrder('Storage Jar Set', 600)">Order Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="why">
+    <h2 class="section-title">Why Choose <span>Us</span></h2>
+    <p class="section-sub">We deliver quality you can trust</p>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="icon">✅</div>
+        <h4>Premium Quality</h4>
+        <p>All products are made from high-grade, food-safe materials.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">💰</div>
+        <h4>Affordable Prices</h4>
+        <p>Best value for money with competitive pricing.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🚚</div>
+        <h4>Fast Delivery</h4>
+        <p>Quick and reliable delivery to your doorstep.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🤝</div>
+        <h4>Trusted by Many</h4>
+        <p>Thousands of happy customers across the region.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h2 class="section-title">Get In <span>Touch</span></h2>
+    <p class="section-sub">We'd love to hear from you</p>
+    <div class="contact-flex">
+      <div class="contact-info">
+        <h3>Contact Information</h3>
+        <div class="contact-item">
+          <div class="icon">📍</div>
+          <p>Royal Plastic & Kitchen<br>Maharajganj, In front of Fire Station,<br>Azamgarh, Uttar Pradesh</p>
+        </div>
+        <div class="contact-item">
+          <div class="icon">📞</div>
+          <p>+91 98997 18067</p>
+        </div>
+        <div class="contact-item">
+          <div class="icon">📧</div>
+          <p>info@royalplastic.pk</p>
+        </div>
+        <div class="contact-item">
+          <div class="icon">🕒</div>
+          <p>Mon – Sat: 9:00 AM – 8:00 PM</p>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3>Send a Message</h3>
+        <input type="text" id="msg-name" placeholder="Your Name">
+        <input type="text" id="msg-phone" placeholder="Phone Number">
+        <textarea id="msg-text" placeholder="Your Message"></textarea>
+        <button onclick="sendMessage()">Send Message</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDERS TABLE -->
+  <section class="orders-section" id="orders">
+    <h2 class="section-title">Customer <span>Orders</span></h2>
+    <p class="section-sub">All placed orders with status management</p>
+    <div class="msg-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="orders-tbody">
+          <tr><td colspan="9" class="no-msg">No orders yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MESSAGES TABLE -->
+  <section class="messages-section" id="messages">
+    <h2 class="section-title">Submitted <span>Messages</span></h2>
+    <p class="section-sub">All messages sent through the contact form</p>
+    <div class="msg-table-wrap">
+      <table id="msg-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Message</th>
+            <th>Date & Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="msg-tbody">
+          <tr><td colspan="6" class="no-msg">No messages yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="clear-btn" onclick="clearAll()">Clear All Messages</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2024 <span>Royal Plastic & Kitchen</span>. All rights reserved.</p>
+  </footer>
+
+  <script>
+    /* ---- ORDERS ---- */
+    const OAPI = 'http://localhost:3000/api/orders';
+    let orderPrice = 0;
+
+    function openOrder(product, price) {
+      orderPrice = price;
+      document.getElementById('o-product').value  = product;
+      document.getElementById('o-qty').value       = 1;
+      document.getElementById('o-total').value     = 'Rs. ' + price;
+      document.getElementById('o-customer').value  = '';
+      document.getElementById('o-phone').value     = '';
+      document.getElementById('o-address').value   = '';
+      document.getElementById('orderModal').classList.add('open');
+    }
+
+    function closeOrder() {
+      document.getElementById('orderModal').classList.remove('open');
+    }
+
+    function updateTotal() {
+      const qty = parseInt(document.getElementById('o-qty').value) || 1;
+      document.getElementById('o-total').value = 'Rs. ' + (orderPrice * qty).toLocaleString();
+    }
+
+    async function submitOrder() {
+      const customer = document.getElementById('o-customer').value.trim();
+      const phone    = document.getElementById('o-phone').value.trim();
+      const address  = document.getElementById('o-address').value.trim();
+      const product  = document.getElementById('o-product').value;
+      const quantity = parseInt(document.getElementById('o-qty').value) || 1;
+
+      if (!customer || !phone || !address) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const res = await fetch(OAPI, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer, phone, address, product, quantity, price: orderPrice })
+      });
+
+      if (res.ok) {
+        closeOrder();
+        alert('Order placed successfully!');
+        renderOrders();
+        document.getElementById('orders').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Failed to place order.');
+      }
+    }
+
+    async function updateStatus(id, status) {
+      await fetch(`${OAPI}/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      renderOrders();
+    }
+
+    async function deleteOrder(id) {
+      if (!confirm('Delete this order?')) return;
+      await fetch(`${OAPI}/${id}`, { method: 'DELETE' });
+      renderOrders();
+    }
+
+    async function renderOrders() {
+      const tbody = document.getElementById('orders-tbody');
+      try {
+        const res    = await fetch(OAPI);
+        const orders = await res.json();
+        if (!orders.length) {
+          tbody.innerHTML = '<tr><td colspan="9" class="no-msg">No orders yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = orders.map((o, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${escHtml(o.customer)}</td>
+            <td>${escHtml(o.phone)}</td>
+            <td>${escHtml(o.product)}</td>
+            <td>${o.quantity}</td>
+            <td>Rs. ${parseFloat(o.total).toLocaleString()}</td>
+            <td>
+              <select class="status-select" onchange="updateStatus(${o.id}, this.value)">
+                ${['Pending','Confirmed','Delivered','Cancelled'].map(s =>
+                  `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td>${new Date(o.created_at).toLocaleDateString()}</td>
+            <td><button class="del-btn" onclick="deleteOrder(${o.id})">Delete</button></td>
+          </tr>
+        `).join('');
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="9" class="no-msg">Could not load orders.</td></tr>';
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('orderModal').addEventListener('click', function(e) {
+      if (e.target === this) closeOrder();
+    });
+
+    renderOrders();
+  </script>
+
+  <script>
+    /* ---- LAZY SLIDER ---- */
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const track  = document.getElementById('sliderTrack');
+    const dotsEl = document.getElementById('sliderDots');
+    let autoTimer;
+
+    // Build dots
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsEl.appendChild(d);
+    });
+
+    function lazyLoad(index) {
+      const img = slides[index].querySelector('img');
+      if (img && img.dataset.src && !img.src.includes('unsplash')) {
+        img.src = img.dataset.src;
+        img.onload = () => img.classList.add('loaded');
+        img.onerror = () => img.classList.add('loaded');
+      } else if (img && !img.classList.contains('loaded')) {
+        if (img.complete) img.classList.add('loaded');
+        else { img.onload = () => img.classList.add('loaded'); img.src = img.dataset.src; }
+      }
+    }
+
+    function goTo(n) {
+      current = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+      lazyLoad(current);
+      lazyLoad((current + 1) % slides.length); // preload next
+    }
+
+    function moveSlide(dir) {
+      resetAuto();
+      goTo(current + dir);
+    }
+
+    function resetAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => goTo(current + 1), 4000);
+    }
+
+    // Init — load first two slides
+    lazyLoad(0);
+    lazyLoad(1);
+    resetAuto();
+  </script>
+
+  <script>
+    const API = 'http://localhost:3000/api/messages';
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function renderTable() {
+      const tbody = document.getElementById('msg-tbody');
+      try {
+        const res  = await fetch(API);
+        const msgs = await res.json();
+        if (!msgs.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="no-msg">No messages yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = msgs.map((m, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${escHtml(m.name)}</td>
+            <td>${escHtml(m.phone)}</td>
+            <td>${escHtml(m.message)}</td>
+            <td>${new Date(m.created_at).toLocaleString()}</td>
+            <td><button class="del-btn" onclick="deleteMsg(${m.id})">Delete</button></td>
+          </tr>
+        `).join('');
+      } catch {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-msg">Could not load messages. Make sure the server is running.</td></tr>';
+      }
+    }
+
+    async function sendMessage() {
+      const name    = document.getElementById('msg-name').value.trim();
+      const phone   = document.getElementById('msg-phone').value.trim();
+      const message = document.getElementById('msg-text').value.trim();
+
+      if (!name || !phone || !message) {
+        alert('Please fill in all fields before sending.');
+        return;
+      }
+
+      const res = await fetch(API, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, phone, message })
+      });
+
+      if (res.ok) {
+        document.getElementById('msg-name').value  = '';
+        document.getElementById('msg-phone').value = '';
+        document.getElementById('msg-text').value  = '';
+        alert('Message sent successfully!');
+        await renderTable();
+        document.getElementById('messages').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        alert('Failed to send message. Check the server.');
+      }
+    }
+
+    async function deleteMsg(id) {
+      if (!confirm('Delete this message?')) return;
+      await fetch(`${API}/${id}`, { method: 'DELETE' });
+      renderTable();
+    }
+
+    async function clearAll() {
+      if (!confirm('Clear all messages?')) return;
+      await fetch(API, { method: 'DELETE' });
+      renderTable();
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
