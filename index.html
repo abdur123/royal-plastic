@@ -891,7 +891,11 @@
       if (!products.length) { grid.innerHTML = '<p style="color:#aaa;text-align:center;padding:2rem">No products available.</p>'; return; }
       grid.innerHTML = products.map(p => `
         <div class="product-card">
-          <div class="product-img">${p.emoji}</div>
+          <div class="product-img">
+            ${p.image_url
+              ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+              : p.emoji}
+          </div>
           <div class="product-info">
             <h4>${p.name}</h4>
             <p>${p.description}</p>

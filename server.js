@@ -2,6 +2,24 @@ const express = require('express');
 const mysql   = require('mysql2');
 const cors    = require('cors');
 const path    = require('path');
+const multer  = require('multer');
+const fs      = require('fs');
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename:    (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (/image\/(jpeg|jpg|png|gif|webp)/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files allowed'));
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+});
 
 const app  = express();
 const PORT = 3000;
@@ -9,6 +27,13 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+app.use('/uploads', express.static(uploadDir));
+
+// --- UPLOAD ROUTE ---
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+  res.json({ url: `/uploads/${req.file.filename}` });
+});
 
 // --- DB Connection ---
 const db = mysql.createConnection({
@@ -117,17 +142,17 @@ app.get('/api/products/all', (req, res) => {
   });
 });
 app.post('/api/products', (req, res) => {
-  const { name, description, price, emoji } = req.body;
-  db.query('INSERT INTO products (name, description, price, emoji) VALUES (?,?,?,?)',
-    [name, description, price, emoji || '📦'], (err, result) => {
+  const { name, description, price, emoji, image_url } = req.body;
+  db.query('INSERT INTO products (name, description, price, emoji, image_url) VALUES (?,?,?,?,?)',
+    [name, description, price, emoji || '📦', image_url || null], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true, id: result.insertId });
   });
 });
 app.put('/api/products/:id', (req, res) => {
-  const { name, description, price, emoji, active } = req.body;
-  db.query('UPDATE products SET name=?, description=?, price=?, emoji=?, active=? WHERE id=?',
-    [name, description, price, emoji, active, req.params.id], (err) => {
+  const { name, description, price, emoji, image_url, active } = req.body;
+  db.query('UPDATE products SET name=?, description=?, price=?, emoji=?, image_url=?, active=? WHERE id=?',
+    [name, description, price, emoji, image_url || null, active, req.params.id], (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });

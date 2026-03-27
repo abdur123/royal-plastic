@@ -113,6 +113,32 @@
 
     .slide-thumb { width: 80px; height: 45px; object-fit: cover; border-radius: 6px; }
 
+    /* UPLOAD */
+    .upload-area {
+      border: 2px dashed #ddd; border-radius: 10px; padding: 1.2rem;
+      text-align: center; cursor: pointer; transition: border-color 0.2s;
+      background: #fafafa; position: relative;
+    }
+    .upload-area:hover { border-color: var(--primary); }
+    .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-area p { font-size: 0.85rem; color: var(--gray); margin-top: 0.3rem; }
+    .upload-area .icon { font-size: 1.8rem; }
+
+    .preview-img {
+      width: 100%; max-height: 160px; object-fit: cover;
+      border-radius: 8px; margin-top: 0.7rem; display: none;
+    }
+
+    .or-divider {
+      text-align: center; color: #bbb; font-size: 0.85rem;
+      margin: 0.5rem 0; position: relative;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #eee;
+    }
+    .or-divider::before { left: 0; }
+    .or-divider::after  { right: 0; }
+
     /* MODAL */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
@@ -173,8 +199,16 @@
               <input type="text" id="s-subtitle" placeholder="Slide subtitle">
             </div>
             <div class="form-group form-full">
-              <label>Image URL</label>
-              <input type="text" id="s-image" placeholder="https://...">
+              <label>Upload Image</label>
+              <div class="upload-area" id="s-upload-area">
+                <div class="icon">🖼️</div>
+                <strong>Click to upload</strong>
+                <p>JPG, PNG, WEBP — max 5MB</p>
+                <input type="file" id="s-file" accept="image/*" onchange="previewImage(this,'s-preview','s-image')">
+              </div>
+              <img id="s-preview" class="preview-img">
+              <div class="or-divider">or paste URL</div>
+              <input type="text" id="s-image" placeholder="https://images.unsplash.com/...">
             </div>
             <div class="form-group">
               <label>Sort Order</label>
@@ -233,6 +267,18 @@
             <div class="form-group form-full">
               <label>Description</label>
               <input type="text" id="p-desc" placeholder="Short product description">
+            </div>
+            <div class="form-group form-full">
+              <label>Upload Product Image</label>
+              <div class="upload-area">
+                <div class="icon">📷</div>
+                <strong>Click to upload</strong>
+                <p>JPG, PNG, WEBP — max 5MB</p>
+                <input type="file" id="p-file" accept="image/*" onchange="previewImage(this,'p-preview','p-image-url')">
+              </div>
+              <img id="p-preview" class="preview-img">
+              <div class="or-divider">or paste URL</div>
+              <input type="text" id="p-image-url" placeholder="https://... (optional)">
             </div>
           </div>
           <button class="submit-btn" onclick="saveProduct()">Save Product</button>
@@ -328,25 +374,53 @@
       document.getElementById('panel-sliders').scrollIntoView({ behavior: 'smooth' });
     }
 
+    function previewImage(input, previewId, urlInputId) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById(previewId);
+        img.src = e.target.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadFile(fileInputId) {
+      const fileInput = document.getElementById(fileInputId);
+      if (!fileInput.files[0]) return null;
+      const form = new FormData();
+      form.append('image', fileInput.files[0]);
+      const res  = await fetch('/api/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      return data.url || null;
+    }
+
     function resetSliderForm() {
-      document.getElementById('s-id').value = '';
-      document.getElementById('s-title').value = '';
+      document.getElementById('s-id').value       = '';
+      document.getElementById('s-title').value    = '';
       document.getElementById('s-subtitle').value = '';
-      document.getElementById('s-image').value = '';
-      document.getElementById('s-order').value = '1';
-      document.getElementById('s-active').value = '1';
+      document.getElementById('s-image').value    = '';
+      document.getElementById('s-order').value    = '1';
+      document.getElementById('s-active').value   = '1';
+      document.getElementById('s-file').value     = '';
+      document.getElementById('s-preview').style.display = 'none';
       document.getElementById('slider-form-title').textContent = 'Add New Slide';
     }
 
     async function saveSlider() {
-      const id       = document.getElementById('s-id').value;
-      const title    = document.getElementById('s-title').value.trim();
-      const subtitle = document.getElementById('s-subtitle').value.trim();
-      const image_url= document.getElementById('s-image').value.trim();
+      const id         = document.getElementById('s-id').value;
+      const title      = document.getElementById('s-title').value.trim();
+      const subtitle   = document.getElementById('s-subtitle').value.trim();
+      let   image_url  = document.getElementById('s-image').value.trim();
       const sort_order = document.getElementById('s-order').value;
-      const active   = document.getElementById('s-active').value;
+      const active     = document.getElementById('s-active').value;
 
-      if (!title || !image_url) { alert('Title and Image URL are required.'); return; }
+      // Upload file if selected
+      const uploaded = await uploadFile('s-file');
+      if (uploaded) image_url = uploaded;
+
+      if (!title || !image_url) { alert('Title and Image are required.'); return; }
 
       const method = id ? 'PUT' : 'POST';
       const url    = id ? `/api/sliders/${id}` : '/api/sliders';
@@ -375,45 +449,58 @@
       tbody.innerHTML = rows.map((p, i) => `
         <tr>
           <td>${i+1}</td>
-          <td style="font-size:1.6rem">${p.emoji}</td>
+          <td>${p.image_url
+            ? `<img src="${escHtml(p.image_url)}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">`
+            : `<span style="font-size:1.6rem">${p.emoji}</span>`}</td>
           <td>${escHtml(p.name)}</td>
           <td>${escHtml(p.description)}</td>
           <td>Rs. ${parseFloat(p.price).toLocaleString()}</td>
           <td><span class="badge ${p.active ? 'badge-on' : 'badge-off'}">${p.active ? 'Active' : 'Inactive'}</span></td>
           <td>
             <div class="action-btns">
-              <button class="edit-btn" onclick="editProduct(${p.id},'${escHtml(p.name)}','${escHtml(p.description)}',${p.price},'${p.emoji}',${p.active})">Edit</button>
+              <button class="edit-btn" onclick="editProduct(${p.id},'${escHtml(p.name)}','${escHtml(p.description)}',${p.price},'${p.emoji}','${escHtml(p.image_url||'')}',${p.active})">Edit</button>
               <button class="del-btn"  onclick="deleteProduct(${p.id})">Delete</button>
             </div>
           </td>
         </tr>`).join('');
     }
 
-    function editProduct(id, name, description, price, emoji, active) {
-      document.getElementById('p-id').value    = id;
-      document.getElementById('p-name').value  = name;
-      document.getElementById('p-desc').value  = description;
-      document.getElementById('p-price').value = price;
-      document.getElementById('p-emoji').value = emoji;
-      document.getElementById('p-active').value= active;
+    function editProduct(id, name, description, price, emoji, image_url, active) {
+      document.getElementById('p-id').value        = id;
+      document.getElementById('p-name').value      = name;
+      document.getElementById('p-desc').value      = description;
+      document.getElementById('p-price').value     = price;
+      document.getElementById('p-emoji').value     = emoji;
+      document.getElementById('p-image-url').value = image_url;
+      document.getElementById('p-active').value    = active;
+      if (image_url) {
+        const prev = document.getElementById('p-preview');
+        prev.src = image_url; prev.style.display = 'block';
+      }
       document.getElementById('product-form-title').textContent = 'Edit Product';
       document.getElementById('panel-products').scrollIntoView({ behavior: 'smooth' });
     }
 
     function resetProductForm() {
-      ['p-id','p-name','p-desc','p-price'].forEach(id => document.getElementById(id).value = '');
+      ['p-id','p-name','p-desc','p-price','p-image-url'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('p-emoji').value  = '📦';
       document.getElementById('p-active').value = '1';
+      document.getElementById('p-file').value   = '';
+      document.getElementById('p-preview').style.display = 'none';
       document.getElementById('product-form-title').textContent = 'Add New Product';
     }
 
     async function saveProduct() {
-      const id    = document.getElementById('p-id').value;
-      const name  = document.getElementById('p-name').value.trim();
+      const id          = document.getElementById('p-id').value;
+      const name        = document.getElementById('p-name').value.trim();
       const description = document.getElementById('p-desc').value.trim();
-      const price = document.getElementById('p-price').value;
-      const emoji = document.getElementById('p-emoji').value || '📦';
-      const active= document.getElementById('p-active').value;
+      const price       = document.getElementById('p-price').value;
+      const emoji       = document.getElementById('p-emoji').value || '📦';
+      const active      = document.getElementById('p-active').value;
+      let   image_url   = document.getElementById('p-image-url').value.trim();
+
+      const uploaded = await uploadFile('p-file');
+      if (uploaded) image_url = uploaded;
 
       if (!name || !price) { alert('Name and Price are required.'); return; }
 
@@ -421,7 +508,7 @@
       const url    = id ? `/api/products/${id}` : '/api/products';
 
       await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, price, emoji, active }) });
+        body: JSON.stringify({ name, description, price, emoji, image_url, active }) });
 
       showToast(id ? 'Product updated!' : 'Product added!');
       resetProductForm();
