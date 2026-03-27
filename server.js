@@ -67,6 +67,78 @@ app.delete('/api/messages', (req, res) => {
   });
 });
 
+// --- SLIDER ROUTES ---
+app.get('/api/sliders', (req, res) => {
+  db.query('SELECT * FROM sliders WHERE active=1 ORDER BY sort_order ASC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.get('/api/sliders/all', (req, res) => {
+  db.query('SELECT * FROM sliders ORDER BY sort_order ASC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.post('/api/sliders', (req, res) => {
+  const { title, subtitle, image_url, sort_order } = req.body;
+  db.query('INSERT INTO sliders (title, subtitle, image_url, sort_order) VALUES (?,?,?,?)',
+    [title, subtitle, image_url, sort_order || 0], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, id: result.insertId });
+  });
+});
+app.put('/api/sliders/:id', (req, res) => {
+  const { title, subtitle, image_url, sort_order, active } = req.body;
+  db.query('UPDATE sliders SET title=?, subtitle=?, image_url=?, sort_order=?, active=? WHERE id=?',
+    [title, subtitle, image_url, sort_order, active, req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+app.delete('/api/sliders/:id', (req, res) => {
+  db.query('DELETE FROM sliders WHERE id=?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// --- PRODUCT ROUTES ---
+app.get('/api/products', (req, res) => {
+  db.query('SELECT * FROM products WHERE active=1 ORDER BY id ASC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.get('/api/products/all', (req, res) => {
+  db.query('SELECT * FROM products ORDER BY id ASC', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.post('/api/products', (req, res) => {
+  const { name, description, price, emoji } = req.body;
+  db.query('INSERT INTO products (name, description, price, emoji) VALUES (?,?,?,?)',
+    [name, description, price, emoji || '📦'], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, id: result.insertId });
+  });
+});
+app.put('/api/products/:id', (req, res) => {
+  const { name, description, price, emoji, active } = req.body;
+  db.query('UPDATE products SET name=?, description=?, price=?, emoji=?, active=? WHERE id=?',
+    [name, description, price, emoji, active, req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+app.delete('/api/products/:id', (req, res) => {
+  db.query('DELETE FROM products WHERE id=?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 // --- ORDER ROUTES ---
 
 // POST /api/orders → place new order

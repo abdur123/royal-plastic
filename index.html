@@ -552,41 +552,7 @@
 
   <!-- SLIDER -->
   <div class="slider-section">
-    <div class="slider-track" id="sliderTrack">
-
-      <div class="slide">
-        <img data-src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80" alt="Kitchen Products">
-        <div class="slide-caption">
-          <h3>Premium Kitchen Products</h3>
-          <p>Everything you need for a modern kitchen</p>
-        </div>
-      </div>
-
-      <div class="slide">
-        <img data-src="https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=1200&q=80" alt="Plastic Storage">
-        <div class="slide-caption">
-          <h3>Durable Plastic Storage</h3>
-          <p>Strong, lightweight storage for every space</p>
-        </div>
-      </div>
-
-      <div class="slide">
-        <img data-src="https://images.unsplash.com/photo-1565183928294-7063f23ce0f8?w=1200&q=80" alt="Food Containers">
-        <div class="slide-caption">
-          <h3>Airtight Food Containers</h3>
-          <p>Keep your food fresh and organised</p>
-        </div>
-      </div>
-
-      <div class="slide">
-        <img data-src="https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=1200&q=80" alt="Home Essentials">
-        <div class="slide-caption">
-          <h3>Home Essentials</h3>
-          <p>Quality products for every room in your home</p>
-        </div>
-      </div>
-
-    </div>
+    <div class="slider-track" id="sliderTrack"></div>
 
     <button class="slider-btn prev" onclick="moveSlide(-1)">&#8249;</button>
     <button class="slider-btn next" onclick="moveSlide(1)">&#8250;</button>
@@ -626,61 +592,8 @@
   <section id="products">
     <h2 class="section-title">Featured <span>Products</span></h2>
     <p class="section-sub">Best sellers from our collection</p>
-    <div class="products-grid">
-      <div class="product-card">
-        <div class="product-img">🪣</div>
-        <div class="product-info">
-          <h4>Heavy Duty Bucket</h4>
-          <p>10L durable plastic bucket, multi-purpose use.</p>
-          <div class="price">Rs. 150</div>
-          <button class="order-btn" onclick="openOrder('Heavy Duty Bucket', 150)">Order Now</button>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-img">🍳</div>
-        <div class="product-info">
-          <h4>Non-Stick Pan Set</h4>
-          <p>3-piece kitchen pan set for everyday cooking.</p>
-          <div class="price">Rs. 1,200</div>
-          <button class="order-btn" onclick="openOrder('Non-Stick Pan Set', 1200)">Order Now</button>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-img">🥡</div>
-        <div class="product-info">
-          <h4>Airtight Container Set</h4>
-          <p>5-piece food-safe airtight storage containers.</p>
-          <div class="price">Rs. 850</div>
-          <button class="order-btn" onclick="openOrder('Airtight Container Set', 850)">Order Now</button>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-img">🧺</div>
-        <div class="product-info">
-          <h4>Laundry Basket</h4>
-          <p>Large ventilated plastic laundry basket.</p>
-          <div class="price">Rs. 450</div>
-          <button class="order-btn" onclick="openOrder('Laundry Basket', 450)">Order Now</button>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-img">🔪</div>
-        <div class="product-info">
-          <h4>Chopping Board</h4>
-          <p>Extra-thick non-slip kitchen chopping board.</p>
-          <div class="price">Rs. 320</div>
-          <button class="order-btn" onclick="openOrder('Chopping Board', 320)">Order Now</button>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-img">🫙</div>
-        <div class="product-info">
-          <h4>Storage Jar Set</h4>
-          <p>Clear plastic jar set for spices and dry goods.</p>
-          <div class="price">Rs. 600</div>
-          <button class="order-btn" onclick="openOrder('Storage Jar Set', 600)">Order Now</button>
-        </div>
-      </div>
+    <div class="products-grid" id="products-grid">
+      <p style="color:#aaa;text-align:center;padding:2rem;">Loading products...</p>
     </div>
   </section>
 
@@ -911,55 +824,83 @@
   </script>
 
   <script>
-    /* ---- LAZY SLIDER ---- */
-    let current = 0;
-    const slides = document.querySelectorAll('.slide');
-    const track  = document.getElementById('sliderTrack');
-    const dotsEl = document.getElementById('sliderDots');
-    let autoTimer;
+    /* ---- LAZY SLIDER (dynamic from DB) ---- */
+    let current = 0, slideCount = 0, autoTimer;
 
-    // Build dots
-    slides.forEach((_, i) => {
-      const d = document.createElement('div');
-      d.className = 'dot' + (i === 0 ? ' active' : '');
-      d.onclick = () => goTo(i);
-      dotsEl.appendChild(d);
-    });
+    function buildSlider(sliders) {
+      const track  = document.getElementById('sliderTrack');
+      const dotsEl = document.getElementById('sliderDots');
+      slideCount   = sliders.length;
+      track.innerHTML  = '';
+      dotsEl.innerHTML = '';
+
+      sliders.forEach((s, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        slide.innerHTML = `
+          <img data-src="${s.image_url}" alt="${s.title}">
+          <div class="slide-caption"><h3>${s.title}</h3><p>${s.subtitle || ''}</p></div>`;
+        track.appendChild(slide);
+
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => { resetAuto(); goTo(i); };
+        dotsEl.appendChild(d);
+      });
+
+      goTo(0);
+      resetAuto();
+    }
 
     function lazyLoad(index) {
+      const slides = document.querySelectorAll('.slide');
+      if (!slides[index]) return;
       const img = slides[index].querySelector('img');
-      if (img && img.dataset.src && !img.src.includes('unsplash')) {
+      if (img && img.dataset.src && !img.src) {
         img.src = img.dataset.src;
-        img.onload = () => img.classList.add('loaded');
+        img.onload  = () => img.classList.add('loaded');
         img.onerror = () => img.classList.add('loaded');
-      } else if (img && !img.classList.contains('loaded')) {
-        if (img.complete) img.classList.add('loaded');
-        else { img.onload = () => img.classList.add('loaded'); img.src = img.dataset.src; }
-      }
+      } else if (img && img.complete) img.classList.add('loaded');
     }
 
     function goTo(n) {
-      current = (n + slides.length) % slides.length;
-      track.style.transform = `translateX(-${current * 100}%)`;
+      const slides = document.querySelectorAll('.slide');
+      current = (n + slideCount) % slideCount;
+      document.getElementById('sliderTrack').style.transform = `translateX(-${current * 100}%)`;
       document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
       lazyLoad(current);
-      lazyLoad((current + 1) % slides.length); // preload next
+      lazyLoad((current + 1) % slideCount);
     }
 
-    function moveSlide(dir) {
-      resetAuto();
-      goTo(current + dir);
-    }
+    function moveSlide(dir) { resetAuto(); goTo(current + dir); }
 
     function resetAuto() {
       clearInterval(autoTimer);
       autoTimer = setInterval(() => goTo(current + 1), 4000);
     }
 
-    // Init — load first two slides
-    lazyLoad(0);
-    lazyLoad(1);
-    resetAuto();
+    fetch('/api/sliders').then(r => r.json()).then(buildSlider).catch(() => buildSlider([]));
+  </script>
+
+  <script>
+    /* ---- PRODUCTS (dynamic from DB) ---- */
+    async function loadProducts() {
+      const res      = await fetch('/api/products');
+      const products = await res.json();
+      const grid     = document.getElementById('products-grid');
+      if (!products.length) { grid.innerHTML = '<p style="color:#aaa;text-align:center;padding:2rem">No products available.</p>'; return; }
+      grid.innerHTML = products.map(p => `
+        <div class="product-card">
+          <div class="product-img">${p.emoji}</div>
+          <div class="product-info">
+            <h4>${p.name}</h4>
+            <p>${p.description}</p>
+            <div class="price">Rs. ${parseFloat(p.price).toLocaleString()}</div>
+            <button class="order-btn" onclick="openOrder('${p.name.replace(/'/g,"\\'")}', ${p.price})">Order Now</button>
+          </div>
+        </div>`).join('');
+    }
+    loadProducts();
   </script>
 
   <script>

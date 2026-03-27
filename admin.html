@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Royal Plastic & Kitchen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --primary: #c0392b; --dark: #1a1a1a; --accent: #f39c12; --light: #f4f6f9; --gray: #666; }
+
+    body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); }
+
+    /* LOGIN */
+    .login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: #fff; padding: 2.5rem; border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 340px; text-align: center;
+    }
+    .login-box h2 { font-size: 1.5rem; margin-bottom: 0.3rem; color: var(--primary); }
+    .login-box p { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .login-box input {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 1rem; margin-bottom: 1rem; outline: none;
+    }
+    .login-box input:focus { border-color: var(--primary); }
+    .login-box button {
+      width: 100%; padding: 0.8rem; background: var(--primary); color: #fff;
+      border: none; border-radius: 30px; font-size: 1rem; cursor: pointer;
+    }
+    .login-box button:hover { background: #a93226; }
+
+    /* LAYOUT */
+    .app { display: none; min-height: 100vh; }
+
+    header {
+      background: var(--dark); color: #fff; padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between; height: 60px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    header h1 { font-size: 1.2rem; }
+    header h1 span { color: var(--accent); }
+    .header-right { display: flex; gap: 1rem; align-items: center; }
+    .visit-btn {
+      padding: 0.4rem 1rem; background: var(--accent); color: #fff;
+      border: none; border-radius: 20px; cursor: pointer; font-size: 0.85rem; text-decoration: none;
+    }
+    .logout-btn {
+      padding: 0.4rem 1rem; background: transparent; color: #aaa;
+      border: 1px solid #555; border-radius: 20px; cursor: pointer; font-size: 0.85rem;
+    }
+    .logout-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .tab {
+      padding: 0.6rem 1.5rem; border-radius: 30px; border: 2px solid #ddd;
+      background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: var(--gray);
+      transition: all 0.2s;
+    }
+    .tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* PANEL */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* CARD */
+    .card {
+      background: #fff; border-radius: 14px; padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem;
+    }
+    .card h3 { font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--primary); border-bottom: 1px solid #f0f0f0; padding-bottom: 0.7rem; }
+
+    /* FORM */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--gray); }
+    .form-group input, .form-group textarea, .form-group select {
+      padding: 0.65rem 0.9rem; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 0.95rem; font-family: inherit; outline: none; transition: border 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-full { grid-column: 1 / -1; }
+
+    .submit-btn {
+      margin-top: 1rem; padding: 0.7rem 2rem; background: var(--primary); color: #fff;
+      border: none; border-radius: 30px; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #a93226; }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    thead { background: var(--dark); color: #fff; }
+    thead th { padding: 0.8rem 1rem; text-align: left; }
+    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.15s; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 0.75rem 1rem; color: var(--gray); vertical-align: middle; }
+    tbody td:first-child { color: var(--dark); font-weight: 600; }
+
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge-on  { background: #d1e7dd; color: #0f5132; }
+    .badge-off { background: #f8d7da; color: #842029; }
+
+    .action-btns { display: flex; gap: 0.4rem; }
+    .edit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 0.25rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem; }
+    .edit-btn:hover { background: var(--accent); color: #fff; }
+    .del-btn  { background: none; border: 1px solid #e74c3c; color: #e74c3c; padding: 0.25rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem; }
+    .del-btn:hover { background: #e74c3c; color: #fff; }
+
+    .slide-thumb { width: 80px; height: 45px; object-fit: cover; border-radius: 6px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; padding: 2rem; width: 90%; max-width: 520px; position: relative; }
+    .modal h3 { font-size: 1.1rem; color: var(--primary); margin-bottom: 1.2rem; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #aaa; }
+    .modal-close:hover { color: var(--primary); }
+
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; background: #2ecc71; color: #fff;
+      padding: 0.8rem 1.5rem; border-radius: 10px; font-size: 0.95rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 9999;
+      opacity: 0; transform: translateY(10px); transition: all 0.3s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <h2>Admin Panel</h2>
+      <p>Royal Plastic & Kitchen</p>
+      <input type="password" id="pwd" placeholder="Enter password" onkeydown="if(event.key==='Enter') login()">
+      <button onclick="login()">Login</button>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <header>
+      <h1>Royal <span>Plastic</span> & Kitchen — Admin</h1>
+      <div class="header-right">
+        <a href="/" class="visit-btn" target="_blank">Visit Site</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('sliders')">Slider Images</div>
+        <div class="tab" onclick="switchTab('products')">Products</div>
+      </div>
+
+      <!-- SLIDERS PANEL -->
+      <div class="panel active" id="panel-sliders">
+        <div class="card">
+          <h3 id="slider-form-title">Add New Slide</h3>
+          <div class="form-grid">
+            <input type="hidden" id="s-id">
+            <div class="form-group">
+              <label>Title</label>
+              <input type="text" id="s-title" placeholder="Slide title">
+            </div>
+            <div class="form-group">
+              <label>Subtitle</label>
+              <input type="text" id="s-subtitle" placeholder="Slide subtitle">
+            </div>
+            <div class="form-group form-full">
+              <label>Image URL</label>
+              <input type="text" id="s-image" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label>Sort Order</label>
+              <input type="number" id="s-order" placeholder="1" value="1" min="1">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="s-active">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="saveSlider()">Save Slide</button>
+          <button class="submit-btn" style="background:#888;margin-left:0.5rem;" onclick="resetSliderForm()">Cancel</button>
+        </div>
+
+        <div class="card">
+          <h3>All Slides</h3>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Image</th><th>Title</th><th>Subtitle</th><th>Order</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="sliders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS PANEL -->
+      <div class="panel" id="panel-products">
+        <div class="card">
+          <h3 id="product-form-title">Add New Product</h3>
+          <div class="form-grid">
+            <input type="hidden" id="p-id">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" id="p-name" placeholder="Product name">
+            </div>
+            <div class="form-group">
+              <label>Emoji / Icon</label>
+              <input type="text" id="p-emoji" placeholder="🪣" maxlength="4">
+            </div>
+            <div class="form-group">
+              <label>Price (Rs.)</label>
+              <input type="number" id="p-price" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="p-active">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group form-full">
+              <label>Description</label>
+              <input type="text" id="p-desc" placeholder="Short product description">
+            </div>
+          </div>
+          <button class="submit-btn" onclick="saveProduct()">Save Product</button>
+          <button class="submit-btn" style="background:#888;margin-left:0.5rem;" onclick="resetProductForm()">Cancel</button>
+        </div>
+
+        <div class="card">
+          <h3>All Products</h3>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Icon</th><th>Name</th><th>Description</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="products-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const ADMIN_PASSWORD = 'admin123';
+
+    function login() {
+      const pwd = document.getElementById('pwd').value;
+      if (pwd === ADMIN_PASSWORD) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadSliders();
+        loadProducts();
+      } else {
+        alert('Wrong password!');
+      }
+    }
+
+    function logout() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('pwd').value = '';
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['sliders','products'][i] === name));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function escHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /* ---- SLIDERS ---- */
+    async function loadSliders() {
+      const res   = await fetch('/api/sliders/all');
+      const rows  = await res.json();
+      const tbody = document.getElementById('sliders-tbody');
+      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#bbb;padding:1.5rem">No slides yet.</td></tr>'; return; }
+      tbody.innerHTML = rows.map((s, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td><img class="slide-thumb" src="${escHtml(s.image_url)}" onerror="this.style.display='none'"></td>
+          <td>${escHtml(s.title)}</td>
+          <td>${escHtml(s.subtitle)}</td>
+          <td>${s.sort_order}</td>
+          <td><span class="badge ${s.active ? 'badge-on' : 'badge-off'}">${s.active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="edit-btn" onclick="editSlider(${s.id},'${escHtml(s.title)}','${escHtml(s.subtitle)}','${escHtml(s.image_url)}',${s.sort_order},${s.active})">Edit</button>
+              <button class="del-btn"  onclick="deleteSlider(${s.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    function editSlider(id, title, subtitle, image_url, sort_order, active) {
+      document.getElementById('s-id').value      = id;
+      document.getElementById('s-title').value   = title;
+      document.getElementById('s-subtitle').value= subtitle;
+      document.getElementById('s-image').value   = image_url;
+      document.getElementById('s-order').value   = sort_order;
+      document.getElementById('s-active').value  = active;
+      document.getElementById('slider-form-title').textContent = 'Edit Slide';
+      document.getElementById('panel-sliders').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetSliderForm() {
+      document.getElementById('s-id').value = '';
+      document.getElementById('s-title').value = '';
+      document.getElementById('s-subtitle').value = '';
+      document.getElementById('s-image').value = '';
+      document.getElementById('s-order').value = '1';
+      document.getElementById('s-active').value = '1';
+      document.getElementById('slider-form-title').textContent = 'Add New Slide';
+    }
+
+    async function saveSlider() {
+      const id       = document.getElementById('s-id').value;
+      const title    = document.getElementById('s-title').value.trim();
+      const subtitle = document.getElementById('s-subtitle').value.trim();
+      const image_url= document.getElementById('s-image').value.trim();
+      const sort_order = document.getElementById('s-order').value;
+      const active   = document.getElementById('s-active').value;
+
+      if (!title || !image_url) { alert('Title and Image URL are required.'); return; }
+
+      const method = id ? 'PUT' : 'POST';
+      const url    = id ? `/api/sliders/${id}` : '/api/sliders';
+
+      await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, subtitle, image_url, sort_order, active }) });
+
+      showToast(id ? 'Slide updated!' : 'Slide added!');
+      resetSliderForm();
+      loadSliders();
+    }
+
+    async function deleteSlider(id) {
+      if (!confirm('Delete this slide?')) return;
+      await fetch(`/api/sliders/${id}`, { method: 'DELETE' });
+      showToast('Slide deleted!');
+      loadSliders();
+    }
+
+    /* ---- PRODUCTS ---- */
+    async function loadProducts() {
+      const res   = await fetch('/api/products/all');
+      const rows  = await res.json();
+      const tbody = document.getElementById('products-tbody');
+      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#bbb;padding:1.5rem">No products yet.</td></tr>'; return; }
+      tbody.innerHTML = rows.map((p, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td style="font-size:1.6rem">${p.emoji}</td>
+          <td>${escHtml(p.name)}</td>
+          <td>${escHtml(p.description)}</td>
+          <td>Rs. ${parseFloat(p.price).toLocaleString()}</td>
+          <td><span class="badge ${p.active ? 'badge-on' : 'badge-off'}">${p.active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="edit-btn" onclick="editProduct(${p.id},'${escHtml(p.name)}','${escHtml(p.description)}',${p.price},'${p.emoji}',${p.active})">Edit</button>
+              <button class="del-btn"  onclick="deleteProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    function editProduct(id, name, description, price, emoji, active) {
+      document.getElementById('p-id').value    = id;
+      document.getElementById('p-name').value  = name;
+      document.getElementById('p-desc').value  = description;
+      document.getElementById('p-price').value = price;
+      document.getElementById('p-emoji').value = emoji;
+      document.getElementById('p-active').value= active;
+      document.getElementById('product-form-title').textContent = 'Edit Product';
+      document.getElementById('panel-products').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetProductForm() {
+      ['p-id','p-name','p-desc','p-price'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('p-emoji').value  = '📦';
+      document.getElementById('p-active').value = '1';
+      document.getElementById('product-form-title').textContent = 'Add New Product';
+    }
+
+    async function saveProduct() {
+      const id    = document.getElementById('p-id').value;
+      const name  = document.getElementById('p-name').value.trim();
+      const description = document.getElementById('p-desc').value.trim();
+      const price = document.getElementById('p-price').value;
+      const emoji = document.getElementById('p-emoji').value || '📦';
+      const active= document.getElementById('p-active').value;
+
+      if (!name || !price) { alert('Name and Price are required.'); return; }
+
+      const method = id ? 'PUT' : 'POST';
+      const url    = id ? `/api/products/${id}` : '/api/products';
+
+      await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description, price, emoji, active }) });
+
+      showToast(id ? 'Product updated!' : 'Product added!');
+      resetProductForm();
+      loadProducts();
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Delete this product?')) return;
+      await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      showToast('Product deleted!');
+      loadProducts();
+    }
+  </script>
+</body>
+</html>
