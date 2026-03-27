@@ -387,13 +387,18 @@
     }
 
     async function uploadFile(fileInputId) {
-      const fileInput = document.getElementById(fileInputId);
-      if (!fileInput.files[0]) return null;
-      const form = new FormData();
-      form.append('image', fileInput.files[0]);
-      const res  = await fetch('/api/upload', { method: 'POST', body: form });
-      const data = await res.json();
-      return data.url || null;
+      try {
+        const fileInput = document.getElementById(fileInputId);
+        if (!fileInput || !fileInput.files[0]) return null;
+        const form = new FormData();
+        form.append('image', fileInput.files[0]);
+        const res  = await fetch('/api/upload', { method: 'POST', body: form });
+        const data = await res.json();
+        return data.url || null;
+      } catch (e) {
+        console.error('Upload failed:', e);
+        return null;
+      }
     }
 
     function resetSliderForm() {
@@ -491,28 +496,35 @@
     }
 
     async function saveProduct() {
-      const id          = document.getElementById('p-id').value;
-      const name        = document.getElementById('p-name').value.trim();
-      const description = document.getElementById('p-desc').value.trim();
-      const price       = document.getElementById('p-price').value;
-      const emoji       = document.getElementById('p-emoji').value || '📦';
-      const active      = document.getElementById('p-active').value;
-      let   image_url   = document.getElementById('p-image-url').value.trim();
+      try {
+        const id          = document.getElementById('p-id').value;
+        const name        = document.getElementById('p-name').value.trim();
+        const description = document.getElementById('p-desc').value.trim();
+        const price       = document.getElementById('p-price').value;
+        const emoji       = document.getElementById('p-emoji').value || '📦';
+        const active      = document.getElementById('p-active').value;
+        let   image_url   = document.getElementById('p-image-url').value.trim();
 
-      const uploaded = await uploadFile('p-file');
-      if (uploaded) image_url = uploaded;
+        if (!name || !price) { alert('Name and Price are required.'); return; }
 
-      if (!name || !price) { alert('Name and Price are required.'); return; }
+        const uploaded = await uploadFile('p-file');
+        if (uploaded) image_url = uploaded;
 
-      const method = id ? 'PUT' : 'POST';
-      const url    = id ? `/api/products/${id}` : '/api/products';
+        const method = id ? 'PUT' : 'POST';
+        const url    = id ? `/api/products/${id}` : '/api/products';
 
-      await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, price, emoji, image_url, active }) });
+        const res  = await fetch(url, { method, headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, price, emoji, image_url, active }) });
+        const data = await res.json();
 
-      showToast(id ? 'Product updated!' : 'Product added!');
-      resetProductForm();
-      loadProducts();
+        if (!data.success && !data.id) { alert('Error: ' + (data.error || 'Unknown error')); return; }
+
+        showToast(id ? 'Product updated!' : 'Product added!');
+        resetProductForm();
+        loadProducts();
+      } catch (e) {
+        alert('Failed to save product: ' + e.message);
+      }
     }
 
     async function deleteProduct(id) {
